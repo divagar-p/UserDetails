@@ -4,13 +4,13 @@ import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField } 
 
 // Define the types for the form inputs
 interface FormInputs {
-    firstName: string;
-    lastName: string;
+    first_name: string;
+    last_name: string;
     email: string;
-    profileImage: string;
+    avatar: string;
 }
 
-const AddEditForm: React.FC = () => {
+const AddForm: React.FC = () => {
     const [open, setOpen] = useState(false); // Modal state
     const {
         register,
@@ -20,7 +20,6 @@ const AddEditForm: React.FC = () => {
 
     // Define the submit handler
     const onSubmit: SubmitHandler<FormInputs> = (data) => {
-        console.log("Submitted Data:", data);
         setOpen(false); // Close modal on submit
     };
 
@@ -36,35 +35,38 @@ const AddEditForm: React.FC = () => {
 
             {/* Modal */}
             <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
-                <DialogTitle>Edit User</DialogTitle>
+                <DialogTitle>Add User</DialogTitle>
                 <DialogContent>
                     <form
-                        id="addEditForm"
+                        id="EditForm"
                         onSubmit={handleSubmit(onSubmit)}
-                        style={{ display: "flex", flexDirection: "column", gap: "20px" }}
+                        style={{ display: "flex", flexDirection: "column", gap: "20px", marginTop: '5px' }}
                     >
                         {/* First Name */}
                         <TextField
+                            size="small"
                             label="First Name"
                             variant="outlined"
                             fullWidth
-                            error={!!errors.firstName}
-                            helperText={errors.firstName?.message}
-                            {...register("firstName", { required: "First Name is required" })}
+                            error={!!errors.first_name}
+                            helperText={errors.first_name?.message}
+                            {...register("first_name", { required: "First Name is required" })}
                         />
 
                         {/* Last Name */}
                         <TextField
+                            size="small"
                             label="Last Name"
                             variant="outlined"
                             fullWidth
-                            error={!!errors.lastName}
-                            helperText={errors.lastName?.message}
-                            {...register("lastName", { required: "Last Name is required" })}
+                            error={!!errors.last_name}
+                            helperText={errors.last_name?.message}
+                            {...register("last_name", { required: "Last Name is required" })}
                         />
 
                         {/* Email */}
                         <TextField
+                            size="small"
                             label="Email"
                             variant="outlined"
                             type="email"
@@ -82,13 +84,14 @@ const AddEditForm: React.FC = () => {
 
                         {/* Profile Image Link */}
                         <TextField
+                            size="small"
                             label="Profile Image Link"
                             variant="outlined"
                             type="url"
                             fullWidth
-                            error={!!errors.profileImage}
-                            helperText={errors.profileImage?.message}
-                            {...register("profileImage", { required: "Profile Image Link is required" })}
+                            error={!!errors.avatar}
+                            helperText={errors.avatar?.message}
+                            {...register("avatar", { required: "Profile Image Link is required" })}
                         />
                     </form>
                 </DialogContent>
@@ -96,7 +99,7 @@ const AddEditForm: React.FC = () => {
                     <Button onClick={handleClose} color="secondary">
                         Cancel
                     </Button>
-                    <Button type="submit" form="addEditForm" color="primary" variant="contained">
+                    <Button type="submit" form="AddForm" color="primary" variant="contained">
                         Submit
                     </Button>
                 </DialogActions>
@@ -105,4 +108,4 @@ const AddEditForm: React.FC = () => {
     );
 };
 
-export default AddEditForm;
+export default AddForm;

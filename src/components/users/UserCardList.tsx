@@ -19,50 +19,13 @@ interface User {
   name: string;
 }
 
-const sampleUsers: User[] = [
-  {
-    id: 1,
-    avatar: 'https://reqres.in/img/faces/1-image.jpg',
-    email: 'george.bluth@reqres.in',
-    name: 'George Bluth',
-  },
-  {
-    id: 2,
-    avatar: 'https://reqres.in/img/faces/2-image.jpg',
-    email: 'janet.weaver@reqres.in',
-    name: 'Janet Weaver',
-  },
-  {
-    id: 3,
-    avatar: 'https://reqres.in/img/faces/3-image.jpg',
-    email: 'emma.wong@reqres.in',
-    name: 'Emma Wong',
-  },
-  {
-    id: 4,
-    avatar: 'https://reqres.in/img/faces/4-image.jpg',
-    email: 'eve.holt@reqres.in',
-    name: 'Eve Holt',
-  },
-  {
-    id: 5,
-    avatar: 'https://reqres.in/img/faces/5-image.jpg',
-    email: 'charles.morris@reqres.in',
-    name: 'Charles Morris',
-  },
-];
-
-const UserCardList: React.FC = () => {
-  const [users, setUsers] = useState<User[]>(sampleUsers);
-
-  const handleDelete = (id: number) => {
-    setUsers(users.filter((user) => user.id !== id));
-  };
+const UserCardList = (props: { users: any, handleEdit: (val: any) => void, handleDelete: (val: any) => void }) => {
+  const { users, handleEdit, handleDelete } = props;
 
   return (
     <Box sx={{ p: 3, backgroundColor: '#f5f5f5' }}>
       <Grid container spacing={3}>
-        {users.map((user) => (
+        {users.map((user: any) => (
           <Grid item xs={12} sm={6} md={4} key={user.id}>
             <Card
               sx={{
@@ -98,7 +61,7 @@ const UserCardList: React.FC = () => {
               >
                 <IconButton
                   sx={{ backgroundColor: 'primary.main', color: 'white', mx: 1 }}
-                  onClick={() => console.log('Edit', user.id)}
+                  onClick={() => handleEdit(user)}
                 >
                   <EditIcon />
                 </IconButton>

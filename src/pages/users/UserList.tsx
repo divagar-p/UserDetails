@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Box,
   Typography,
@@ -20,8 +20,13 @@ import SearchIcon from '@mui/icons-material/Search';
 import ListOutlinedIcon from '@mui/icons-material/ListOutlined';
 import GridOnOutlinedIcon from '@mui/icons-material/GridOnOutlined';
 import { useAppSelector } from '../../redux/hooks';
-import { RootState } from '../../redux/store';
-import AddEditForm from './AddEditForm';
+import { dispatch, RootState } from '../../redux/store';
+import AddEditForm from '../../components/users/AddForm';
+import { useNavigate } from 'react-router-dom';
+import { userDelete, userList } from '../../redux/slice/UserSlice';
+import UserTable from '../../components/users/UserTable';
+import UserCardList from '../../components/users/UserCardList';
+import EditForm from '../../components/users/EditForm';
 
 interface User {
   id: number;
@@ -31,54 +36,45 @@ interface User {
   last_name: string;
 }
 
-const sampleUsers: User[] = [
-  {
-    id: 1,
-    avatar: 'https://reqres.in/img/faces/1-image.jpg',
-    email: 'george.bluth@reqres.in',
-    first_name: 'George',
-    last_name: 'Bluth',
-  },
-  {
-    id: 2,
-    avatar: 'https://reqres.in/img/faces/2-image.jpg',
-    email: 'janet.weaver@reqres.in',
-    first_name: 'Janet',
-    last_name: 'Weaver',
-  },
-  {
-    id: 3,
-    avatar: 'https://reqres.in/img/faces/3-image.jpg',
-    email: 'emma.wong@reqres.in',
-    first_name: 'Emma',
-    last_name: 'Wong',
-  },
-  {
-    id: 4,
-    avatar: 'https://reqres.in/img/faces/4-image.jpg',
-    email: 'eve.holt@reqres.in',
-    first_name: 'Eve',
-    last_name: 'Holt',
-  },
-  {
-    id: 5,
-    avatar: 'https://reqres.in/img/faces/5-image.jpg',
-    email: 'charles.morris@reqres.in',
-    first_name: 'Charles',
-    last_name: 'Morris',
-  },
-];
-
 const UserList: React.FC = () => {
-  const { login,status,error } = useAppSelector((state: RootState) => state.login);
-  console.log(login,status,error, 'loginRes')
-  const [users, setUsers] = useState<User[]>(sampleUsers);
+  const navigate = useNavigate();
+  const { login, user } = useAppSelector((state: RootState) => state);
+  const [users, setUsers] = useState<User[]>([]);
+  const [selectedView, setSelectedView] = useState<string>('Table');
+  const [totalPage, setTotalPage] = useState<number>(1);
   const [searchText, setSearchText] = useState('');
+  const [editUser, setEditUser] = useState({ open: false, editUser: {} });
   const [page, setPage] = useState(1);
+
+
+  useEffect(() => {
+    dispatch(userList({ page: 1, per_page: 5 }));
+  }, [])
+
+  useEffect(() => {
+    if (login?.status !== 'succeeded') {
+      navigate('/Login');
+    }
+  }, [login?.status])
+
+
+  useEffect(() => {
+    if (user?.userListStatus === 'succeeded') {
+      const data = user?.userList
+      setUsers(data?.data);
+      setTotalPage(data?.total_pages);
+    }
+  }, [user?.userListStatus])
+
+  useEffect(() => {
+    if (user?.userDeleteStatus === 'succeeded') {
+      const data = user?.userDeleteStatus
+    }
+  }, [user?.userDeleteStatus])
 
   const handleSearch = () => {
     // Example filter logic (case-insensitive search)
-    const filteredUsers = sampleUsers.filter(
+    const filteredUsers = users?.filter(
       (user) =>
         user.email.toLowerCase().includes(searchText.toLowerCase()) ||
         user.first_name.toLowerCase().includes(searchText.toLowerCase()) ||
@@ -88,9 +84,15 @@ const UserList: React.FC = () => {
   };
 
   const handleDelete = (id: number) => {
-    setUsers(users.filter((user) => user.id !== id));
+    // setUsers(users?.filter((user) => user.id !== id));
+    dispatch(userDelete({ id: id }))
   };
 
+
+  const onPagination = (value: any) => {
+    setPage(value)
+    dispatch(userList({ page: value, per_page: 5 }));
+  }
   return (
     <Container
       maxWidth="lg" // Fixed width, options: xs, sm, md, lg, xl
@@ -125,10 +127,7 @@ const UserList: React.FC = () => {
           <IconButton onClick={handleSearch} color="primary">
             <SearchIcon />
           </IconButton>
-          {/* <Button variant="contained" color="primary">
-            Create User
-          </Button> */}
-          <AddEditForm/>
+          <AddEditForm />
         </Box>
       </Box>
 
@@ -137,75 +136,19 @@ const UserList: React.FC = () => {
         mb: 2
       }}>
         <ButtonGroup size="small" aria-label="Small button group">
-          <Button size='small' variant="outlined" startIcon={<GridOnOutlinedIcon />}>
+          <Button size='small' color={selectedView === 'Card' ? 'inherit' : 'primary'} variant="outlined" startIcon={<GridOnOutlinedIcon />} onClick={() => setSelectedView("Table")}>
             Table
           </Button>
-          <Button size='small' color='inherit' variant="outlined" startIcon={<ListOutlinedIcon />}>
+          <Button size='small' color={selectedView === 'Table' ? 'inherit' : 'primary'} variant="outlined" startIcon={<ListOutlinedIcon />} onClick={() => setSelectedView("Card")}>
             Card
           </Button>
         </ButtonGroup>
       </Box>
-
-      {/* User Table */}
-      <TableContainer
-        sx={{
-          border: '1px solid #e0e0e0',
-          borderRadius: '8px',
-          backgroundColor: 'white',
-        }}
-      >
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell> </TableCell>
-              <TableCell>Email</TableCell>
-              <TableCell>First Name</TableCell>
-              <TableCell>Last Name</TableCell>
-              <TableCell align="center">Action</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {users.map((user) => (
-              <TableRow key={user.id}>
-                <TableCell>
-                  <Avatar src={user.avatar} alt={user.first_name} />
-                </TableCell>
-                <TableCell>{user.email}</TableCell>
-                <TableCell>{user.first_name}</TableCell>
-                <TableCell>{user.last_name}</TableCell>
-                <TableCell align="center">
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    size="small"
-                    sx={{ mr: 1 }}
-                  >
-                    Edit
-                  </Button>
-                  <Button
-                    variant="contained"
-                    color="error"
-                    size="small"
-                    onClick={() => handleDelete(user.id)}
-                  >
-                    Delete
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-
-      {/* Pagination */}
-      <Box sx={{ display: 'flex', justifyContent: 'end', mt: 2 }}>
-        <Pagination
-          count={3}
-          page={page}
-          onChange={(e, value) => setPage(value)}
-          color="primary"
-        />
-      </Box>
+      {selectedView === 'Table' ?
+        <UserTable page={page} totalPage={totalPage} users={users} handleEdit={(val: number) => setEditUser({ open: true, editUser: val })} handleDelete={(val: number) => handleDelete(val)} onPagination={(val: number) => onPagination(val)} />
+        : <UserCardList users={users} handleEdit={(val: number) => setEditUser({ open: true, editUser: val })} handleDelete={(val: number) => handleDelete(val)} />
+      }
+      <EditForm editUser={editUser} onClose={() => setEditUser({ open: false, editUser: {} })} />
     </Container>
   );
 };

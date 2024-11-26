@@ -1,20 +1,26 @@
 import { Box, Button, Checkbox, FormControlLabel, TextField, Typography } from '@mui/material';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAppDispatch } from '../redux/hooks';
+import { useAppSelector } from '../redux/hooks';
 import { loginUser } from '../redux/slice/LoginSlice';
+import { dispatch, RootState } from '../redux/store';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
-  const dispatch = useAppDispatch();
+  const { login, status, error } = useAppSelector((state: RootState) => state.login);
   const [email, setEmail] = useState('eve.holt@reqres.in');
   const [password, setPassword] = useState('cityslicka')
 
   const handleLogin = (event: React.FormEvent) => {
     event.preventDefault();
     dispatch(loginUser({ email: email, password: password }));
-    navigate('/UserList');
   };
+
+  useEffect(() => {
+    if (status === 'succeeded') {
+      navigate('/UserList');
+    }
+  }, [status])
 
   return (
     <Box
